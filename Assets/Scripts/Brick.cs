@@ -96,6 +96,10 @@ public class Brick : MonoBehaviour {
 				break;
 			}
 			
+			if (Input.GetButtonDown("Camera")) {
+				Manager.use.ChangeCamera();
+			}
+			
 			yield return 0;
 		}
 	}

@@ -7,7 +7,7 @@
           <Node name="Assembly-CSharp" expanded="True">
             <Node name="Assets" expanded="True">
               <Node name="Scripts" expanded="True">
-                <Node name="Manager.cs" selected="True" />
+                <Node name="Brick.cs" selected="True" />
               </Node>
             </Node>
           </Node>

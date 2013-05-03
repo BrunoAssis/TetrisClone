@@ -16,6 +16,9 @@ public class Manager : MonoBehaviour {
 	public Transform cube;
 	public Transform leftWall;
 	public Transform rightWall;
+	
+	public Camera camera3D;
+	public Camera camera2D;
 
 	private int totalFieldWidth;
 	private int totalFieldHeight;
@@ -63,12 +66,20 @@ public class Manager : MonoBehaviour {
 		// (Though the camera would have to be moved back for larger sizes)
 		this.leftWall.position = new Vector3(this.maxBrickSize - 0.5f, this.leftWall.position.y, this.leftWall.position.z);
 		this.rightWall.position = new Vector3(this.totalFieldWidth - this.maxBrickSize + 0.5f, this.rightWall.position.y, this.rightWall.position.z);
-		Camera.main.transform.position = new Vector3(this.totalFieldWidth / 2, this.totalFieldHeight / 2, -16.5f);
+		
+		this.camera2D.enabled = false;
+		this.camera3D.enabled = true;
+		this.camera3D.transform.position = new Vector3(this.totalFieldWidth / 2, this.totalFieldHeight / 2, -16.5f);
 		
 		this.cubeReferences = new Transform[this.totalFieldWidth * this.totalFieldHeight];
 		this.cubePositions = new int[this.totalFieldWidth * this.totalFieldHeight];
 
 		this.SpawnBrick();
+	}
+	
+	public void ChangeCamera () {
+		this.camera2D.enabled = !this.camera2D.enabled;
+		this.camera3D.enabled = !this.camera3D.enabled;
 	}
 	
 	private void SpawnBrick () {
