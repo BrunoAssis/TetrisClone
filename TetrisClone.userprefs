@@ -1,0 +1,31 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Manager.cs">
+    <Files>
+      <File FileName="Assets/Scripts/Manager.cs" Line="188" Column="2" />
+      <File FileName="Assets/Scripts/Brick.cs" Line="78" Column="5" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State expanded="True">
+          <Node name="Assembly-CSharp" expanded="True">
+            <Node name="Assets" expanded="True">
+              <Node name="Scripts" expanded="True">
+                <Node name="Manager.cs" selected="True" />
+              </Node>
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore>
+      <Breakpoint file="/Users/brunoassis/Dev/Unity/TetrisClone/Assets/Manager.cs" line="39" />
+      <Breakpoint file="/Users/brunoassis/Dev/Unity/TetrisClone/Assets/Manager.cs" line="62" />
+      <Breakpoint file="/Users/brunoassis/Dev/Unity/TetrisClone/Assets/Block.cs" line="47" />
+      <Breakpoint file="/Users/brunoassis/Dev/Unity/TetrisClone/Assets/Block.cs" line="141" />
+    </BreakpointStore>
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
