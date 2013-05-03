@@ -13,7 +13,7 @@ public class Brick : MonoBehaviour {
 	private float halfSizeFloat;
 	private bool dropped = false;
 	
-	void Start() {
+	IEnumerator Start() {
 		// Sanity checking
 		this.size = this.brickShape.Length;
 		
@@ -21,23 +21,23 @@ public class Brick : MonoBehaviour {
 		
 		if (this.size < 2) {
 			Debug.LogError ("Bricks must have at least two lines");
-			return;
+			yield break;
 		}
 		
 		if (width != size) {
 			Debug.LogError ("Brick width and height must be the same");
-			return;
+			yield break;
 		}
 		
 		if (this.size > Manager.use.maxBrickSize) {
 			Debug.LogError ("Brick must not be larger than " + Manager.use.maxBrickSize);
-			return;
+			yield break;
 		}
 		
 		for (int i = 1; i < size; i++) {
 			if (this.brickShape[i].Length != this.brickShape[i-1].Length) {
 				Debug.LogError ("All lines in the brick must be the same length");
-				return;
+				yield break;
 			}
 		}
 
@@ -69,31 +69,34 @@ public class Brick : MonoBehaviour {
 		// Check to see if this brick would overlap existing bricks, in which case the game is over
 		if (Manager.use.CheckBrickCollision(this.cubeMatrix, this.xPosition, this.yPosition)) {
 			Manager.use.GameOver();
-			return;
+			yield break;
 		}
+		
+		StartCoroutine(CheckInput());
+		yield return StartCoroutine(Delay((1.0f / Manager.use.brickNormalSpeed) * 2.0f));
+		StartCoroutine(Fall());
 	}
 	
-	void Update () {
-		this.CheckInput();
-		//yield return this.Delay((1.0f / Manager.use.brickNormalSpeed) * 2.0f);
-		this.Fall();
-	}
+	private IEnumerator CheckInput () {
+		while (true) {
+			float input = Input.GetAxis("Horizontal");
+			if (input < 0.0f) {
+				yield return StartCoroutine(this.MoveHorizontal(-1));
+			} else if (input > 0.0f) {
+				yield return StartCoroutine(this.MoveHorizontal(1));
+			}
 	
-	private void CheckInput () {
-		float input = Input.GetAxis("Horizontal");
-		if (input < 0.0f) {
-			this.MoveHorizontal(-1);
-		} else if (input > 0.0f) {
-			this.MoveHorizontal(1);
-		}
-
-		if (Input.GetButtonDown("Rotate")) {
-			this.RotateBrick();
-		}
-
-		if (Input.GetButtonDown("Drop")) {
-			this.fallSpeed = Manager.use.brickDropSpeed;
-			this.dropped = true;
+			if (Input.GetButtonDown("Rotate")) {
+				this.RotateBrick();
+			}
+	
+			if (Input.GetButtonDown("Drop")) {
+				this.fallSpeed = Manager.use.brickDropSpeed;
+				this.dropped = true;
+				break;
+			}
+			
+			yield return 0;
 		}
 	}
 
@@ -106,27 +109,30 @@ public class Brick : MonoBehaviour {
 		}
 	}
 	
-	private void Fall () {
-		// Check to see if brick would collide if moved down one row
-		this.yPosition--;
-		if (Manager.use.CheckBrickCollision(this.cubeMatrix, this.xPosition, this.yPosition)) {
-			Manager.use.SetBrick(this.cubeMatrix, this.xPosition, this.yPosition+1);
-			Destroy(this.gameObject);
-		}
-			
-		// Make on-screen brick fall down 1 square
-		// Also serves as a delay...if you want old-fashioned square-by-square movement, replace this with yield WaitForSeconds
-		for (float i = (float) this.yPosition + 1.0f; i > this.yPosition; i -= Time.deltaTime * this.fallSpeed) {
-			this.transform.position = new Vector3(this.transform.position.x, i - this.halfSizeFloat, this.transform.position.z);
+	private IEnumerator Fall () {
+		while (true) {
+			// Check to see if brick would collide if moved down one row
+			this.yPosition--;
+			if (Manager.use.CheckBrickCollision(this.cubeMatrix, this.xPosition, this.yPosition)) {
+				StartCoroutine(Manager.use.SetBrick(this.cubeMatrix, this.xPosition, this.yPosition+1));
+				Destroy(this.gameObject);
+				break;
+			}
+				
+			// Make on-screen brick fall down 1 square
+			for (float i = (float) this.yPosition + 1.0f; i > this.yPosition; i -= Time.deltaTime * this.fallSpeed) {
+				this.transform.position = new Vector3(this.transform.position.x, i - this.halfSizeFloat, this.transform.position.z);
+				yield return 0;
+			}
 		}
 	}
 	
-	private void MoveHorizontal (int dir) {
+	private IEnumerator MoveHorizontal (int dir) {
 		// Check to see if brick could be moved in the desired direction
 		if (!Manager.use.CheckBrickCollision(this.cubeMatrix, this.xPosition + dir, this.yPosition)) {
 			this.transform.position += new Vector3(dir, 0.0f, 0.0f);
 			this.xPosition += dir;
-			//yield return new WaitForSeconds(Manager.use.brickMoveDelay);
+			yield return new WaitForSeconds(Manager.use.brickMoveDelay);
 		}
 	}
 	

@@ -63,7 +63,7 @@ public class Manager : MonoBehaviour {
 		// (Though the camera would have to be moved back for larger sizes)
 		this.leftWall.position = new Vector3(this.maxBrickSize - 0.5f, this.leftWall.position.y, this.leftWall.position.z);
 		this.rightWall.position = new Vector3(this.totalFieldWidth - this.maxBrickSize + 0.5f, this.rightWall.position.y, this.rightWall.position.z);
-		Camera.main.transform.position = new Vector3(this.totalFieldWidth / 2, this.totalFieldHeight / 2, -16.0f);
+		Camera.main.transform.position = new Vector3(this.totalFieldWidth / 2, this.totalFieldHeight / 2, -16.5f);
 		
 		this.cubeReferences = new Transform[this.totalFieldWidth * this.totalFieldHeight];
 		this.cubePositions = new int[this.totalFieldWidth * this.totalFieldHeight];
@@ -102,42 +102,48 @@ public class Manager : MonoBehaviour {
 	// Just using DetachChildren isn't feasible because the child cubes can be in different orientations,
 	// which can mess up their position on the Y axis, which we need to be consistent in CollapseRow
 	// Also write the block matrix into the corresponding location in the playing field
-	public void SetBrick (bool[,] blockMatrix, int xPos, int yPos) {
+	public IEnumerator SetBrick (bool[,] blockMatrix, int xPos, int yPos) {
 		int size = blockMatrix.GetLength(0);
 		for (int y = 0; y < size; y++) {
 			for (int x = 0; x < size; x++) {	
 				if (blockMatrix[x, y]) {
-					Instantiate(cube, new Vector3(xPos+x, yPos+y, 0f), Quaternion.identity);
+					Instantiate(cube, new Vector3(xPos+x, yPos-y, 0.0f), Quaternion.identity);
 					this.playfield[xPos+x, yPos-y] = true;
 				}
 			}
 		}
-		//this.CheckRows (yPos - size, size);
+		
+		// Nada roda depois dessa funçao.
 		this.SpawnBrick();
+		yield return StartCoroutine(this.CheckRows(yPos - size, size));
+		
 	}
 	
-	private IEnumerable CheckRows (int yStart, int size) {
+	private IEnumerator CheckRows (int yStart, int size) {
 		yield return 0;	// Wait a frame for block to be destroyed so we don't include those cubes
 		
-		if (yStart < 1) { 
+		if (yStart < 1) {
 			yStart = 1;	// Make sure to start above the floor
 		}
 		
 		int lastX = 0;
 		for (int y = yStart; y < yStart+size; y++) {
-			for (int x = maxBrickSize; x < totalFieldWidth-maxBrickSize; x++) { // We don't need to check the walls
+			for (int x = this.maxBrickSize; x < this.totalFieldWidth - this.maxBrickSize; x++) { // We don't need to check the walls
 				if (!this.playfield[x, y]) break;
 				lastX = x;
 			}
+			lastX++;
+			
 			// If the loop above completed, then x will equal fieldWidth-maxBlockSize, which means the row was completely filled in
 			if (lastX == this.totalFieldWidth - this.maxBrickSize) {
-				yield return CollapseRows (y);
+				yield return StartCoroutine(CollapseRows(y));
 				y--; // We want to check the same row again after the collapse, in case there was more than one row filled in
 			}
 		}
+		
 	}
 	
-	private IEnumerable CollapseRows (int yStart) {
+	private IEnumerator CollapseRows (int yStart) {
 		// Move rows down in array, which effectively deletes the current row (yStart)
 		for (int y = yStart; y < this.totalFieldHeight-1; y++) {
 			for (int x = this.maxBrickSize; x < this.totalFieldWidth - this.maxBrickSize; x++) {
@@ -154,7 +160,7 @@ public class Manager : MonoBehaviour {
 		GameObject[] cubes = GameObject.FindGameObjectsWithTag("Cube");
 		int cubesToMove = 0;
 
-		foreach(GameObject cube in cubes) {
+		foreach (GameObject cube in cubes) {
 			if (cube.transform.position.y > yStart) {
 				this.cubePositions[cubesToMove] = (int) cube.transform.position.y;
 				this.cubeReferences[cubesToMove++] = cube.transform;
@@ -167,7 +173,7 @@ public class Manager : MonoBehaviour {
 		// The third parameter in Mathf.Lerp is clamped to 1.0, which makes the transform.position.y be positioned exactly when done,
 		// which is important for the game logic (see the code just above)
 		float t = 0.0f;
-		while (t <= 1.0) {
+		while (t <= 1.0f) {
 			t += Time.deltaTime * 5.0f;
 			for (int i = 0; i < cubesToMove; i++) {
 				this.cubeReferences[i].position = new Vector3(
