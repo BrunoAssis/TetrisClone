@@ -28,7 +28,10 @@ public class Manager : MonoBehaviour {
 	private int rowsCleared = 0;
 	
 	public static Manager use;
-
+	
+	/// <summary>
+	/// Unity runs this automatically when the game is first started.
+	/// </summary>
 	void Start () {
 		if (!Manager.use) {
 			Manager.use = this;	// Get a reference to this script, which is a static variable so it's used as a singleton
@@ -77,25 +80,56 @@ public class Manager : MonoBehaviour {
 		this.SpawnBrick();
 	}
 	
+	/// <summary>
+	/// Changes the camera view from 3D to 2D (or vice-versa).
+	/// </summary>
 	public void ChangeCamera () {
 		this.camera2D.enabled = !this.camera2D.enabled;
 		this.camera3D.enabled = !this.camera3D.enabled;
 	}
 	
+	/// <summary>
+	/// Spawns a new brick at the top of the screen.
+	/// </summary>
 	private void SpawnBrick () {
 		Instantiate(this.existentBricks[Random.Range(0, this.existentBricks.Length)]);
 	}
 	
+	/// <summary>
+	/// Get the total height of the field.
+	/// </summary>
+	/// <returns>
+	/// The field height.
+	/// </returns>
 	public int TotalFieldHeight () {
 		return this.totalFieldHeight;
 	}
 	
+	/// <summary>
+	/// Get the total width of the field.
+	/// </summary>
+	/// <returns>
+	/// The field width.
+	/// </returns>
 	public int TotalFieldWidth () {
 		return this.totalFieldWidth;
 	}
-	
-	// See if the block matrix would overlap existing blocks in the playing field
-	// (Check from bottom-up, since in general gameplay usage it's a bit more efficient that way)
+
+	/// <summary>
+	/// Checks if the brick is colliding (if the block matrix would overlap existing blocks in the playing field).
+	/// </summary>
+	/// <returns>
+	/// true if collided, false if not collided.
+	/// </returns>
+	/// <param name='brickMatrix'>
+	/// The brick shape matrix.
+	/// </param>
+	/// <param name='xPos'>
+	/// Playfield X position.
+	/// </param>
+	/// <param name='yPos'>
+	/// Playfield Y position.
+	/// </param>
 	public bool CheckBrickCollision (bool[,] brickMatrix, int xPos, int yPos) {
 		int size = brickMatrix.GetLength(0);
 
@@ -109,27 +143,45 @@ public class Manager : MonoBehaviour {
 		return false;
 	}
 	
-	// Make on-screen cubes from position in array when the block is stopped from falling any more
-	// Just using DetachChildren isn't feasible because the child cubes can be in different orientations,
-	// which can mess up their position on the Y axis, which we need to be consistent in CollapseRow
-	// Also write the block matrix into the corresponding location in the playing field
-	public IEnumerator SetBrick (bool[,] blockMatrix, int xPos, int yPos) {
-		int size = blockMatrix.GetLength(0);
+	/// <summary>
+	/// // Make on-screen cubes from position in array when the block is stopped from falling any more
+	/// </summary>
+	/// <param name='brickMatrix'>
+	/// The brick shape matrix.
+	/// </param>
+	/// <param name='xPos'>
+	/// Playfield X position.
+	/// </param>
+	/// <param name='yPos'>
+	/// Playfield Y position.
+	/// </param>
+	public IEnumerator SetBrick (bool[,] brickMatrix, int xPos, int yPos) {
+		// Just using DetachChildren isn't feasible because the child cubes can be in different orientations,
+		// which can mess up their position on the Y axis, which we need to be consistent in CollapseRow
+		// Also write the block matrix into the corresponding location in the playing field
+		int size = brickMatrix.GetLength(0);
 		for (int y = 0; y < size; y++) {
 			for (int x = 0; x < size; x++) {	
-				if (blockMatrix[x, y]) {
+				if (brickMatrix[x, y]) {
 					Instantiate(cube, new Vector3(xPos+x, yPos-y, 0.0f), Quaternion.identity);
 					this.playfield[xPos+x, yPos-y] = true;
 				}
 			}
 		}
-		
-		// Nada roda depois dessa funçao.
+
 		this.SpawnBrick();
-		yield return StartCoroutine(this.CheckRows(yPos - size, size));
-		
+		yield return StartCoroutine(this.CheckRows(yPos - size, size));		
 	}
 	
+	/// <summary>
+	/// Checks if the row is filled.
+	/// </summary>
+	/// <param name='yStart'>
+	/// Y position it should start checking.
+	/// </param>
+	/// <param name='size'>
+	/// The brick size.
+	/// </param>
 	private IEnumerator CheckRows (int yStart, int size) {
 		yield return 0;	// Wait a frame for block to be destroyed so we don't include those cubes
 		
@@ -154,6 +206,12 @@ public class Manager : MonoBehaviour {
 		
 	}
 	
+	/// <summary>
+	/// Collapses the rows which are filled.
+	/// </summary>
+	/// <param name='yStart'>
+	/// Y position it should start collapsing.
+	/// </param>
 	private IEnumerator CollapseRows (int yStart) {
 		// Move rows down in array, which effectively deletes the current row (yStart)
 		for (int y = yStart; y < this.totalFieldHeight-1; y++) {
@@ -202,12 +260,18 @@ public class Manager : MonoBehaviour {
 			this.rowsCleared = 0;
 		}
 	}
-
+	
+	/// <summary>
+	/// Placeholder for the Game Over screen.
+	/// </summary>
 	public void GameOver () {
 		Debug.Log ("Game Over!");
 	}
 
-	// Prints the state of the field array, for debugging
+	
+	/// <summary>
+	/// Prints the state of the field array, for debugging
+	/// </summary>
 	public void PrintField () {
 		string fieldChars = "";
 

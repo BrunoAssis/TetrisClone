@@ -1,6 +1,9 @@
 using UnityEngine;
 using System.Collections;
 
+/// <summary>
+/// Brick. Composed by little "Cube"s. 
+/// </summary>
 public class Brick : MonoBehaviour {
 	
 	public string[] brickShape;
@@ -13,8 +16,11 @@ public class Brick : MonoBehaviour {
 	private float halfSizeFloat;
 	private bool dropped = false;
 	
+	/// <summary>
+	/// Unity runs this automatically when the Brick is instantiated.
+	/// </summary>
 	IEnumerator Start() {
-		// Sanity checking
+		// Validations.
 		this.size = this.brickShape.Length;
 		
 		int width = this.brickShape[0].Length;
@@ -77,6 +83,9 @@ public class Brick : MonoBehaviour {
 		StartCoroutine(Fall());
 	}
 	
+	/// <summary>
+	/// Checks keyboard input.
+	/// </summary>
 	private IEnumerator CheckInput () {
 		while (true) {
 			float input = Input.GetAxis("Horizontal");
@@ -104,7 +113,12 @@ public class Brick : MonoBehaviour {
 		}
 	}
 
-	// This is used instead of WaitForSeconds, so that the delay can be cut short if player hits the drop button
+	/// <summary>
+	/// Delay the game in x seconds. This is used instead of WaitForSeconds, so that the delay can be cut short if player hits the drop button.
+	/// </summary>
+	/// <param name='seconds'>
+	/// Seconds.
+	/// </param>
 	private IEnumerator Delay (float seconds) {
 		float t = 0.0f;
 		while (t <= seconds && !dropped) {
@@ -113,6 +127,9 @@ public class Brick : MonoBehaviour {
 		}
 	}
 	
+	/// <summary>
+	/// Make the brick fall.
+	/// </summary>
 	private IEnumerator Fall () {
 		while (true) {
 			// Check to see if brick would collide if moved down one row
@@ -131,6 +148,12 @@ public class Brick : MonoBehaviour {
 		}
 	}
 	
+	/// <summary>
+	/// Moves the brick horizontally.
+	/// </summary>
+	/// <param name='dir'>
+	/// Direction: -1 (left) or 1 (right)
+	/// </param>
 	private IEnumerator MoveHorizontal (int dir) {
 		// Check to see if brick could be moved in the desired direction
 		if (!Manager.use.CheckBrickCollision(this.cubeMatrix, this.xPosition + dir, this.yPosition)) {
@@ -140,6 +163,9 @@ public class Brick : MonoBehaviour {
 		}
 	}
 	
+	/// <summary>
+	/// Rotates the brick.
+	/// </summary>
 	private void RotateBrick () {
 		// Rotate matrix 90° to the right and store the results in a temporary matrix
 		bool[,] tempMatrix = new bool[this.size, this.size];
